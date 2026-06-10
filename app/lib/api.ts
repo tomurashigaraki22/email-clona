@@ -58,7 +58,9 @@ async function request<T>(path: string, token: string, init?: RequestInit): Prom
     const text = await res.text().catch(() => res.statusText);
     throw new Error(`${res.status}: ${text}`);
   }
-  return res.json() as Promise<T>;
+  const json = await res.json();
+  // ResponseInterceptor wraps all responses as { data: <actual> }
+  return (json?.data ?? json) as T;
 }
 
 export interface AnalyticsParams {
