@@ -398,7 +398,7 @@ function Dashboard({ token, admin, onLogout }: { token: string; admin: AdminInfo
       if (f.startDate) params.startDate = new Date(f.startDate).toISOString();
       if (f.endDate) params.endDate = new Date(f.endDate + 'T23:59:59').toISOString();
       const res = await fetchAnalytics(token, params);
-      setData(res.data);
+      setData(res);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to load analytics');
       if (e instanceof Error && e.message.startsWith('401')) onLogout();

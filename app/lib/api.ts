@@ -59,8 +59,7 @@ async function request<T>(path: string, token: string, init?: RequestInit): Prom
     throw new Error(`${res.status}: ${text}`);
   }
   const json = await res.json();
-  // ResponseInterceptor wraps all responses as { data: <actual> }
-  return (json?.data ?? json) as T;
+  return json as T;
 }
 
 export interface AnalyticsParams {
@@ -89,13 +88,12 @@ export async function adminLogin(email: string, password: string): Promise<{ tok
     const text = await res.text().catch(() => res.statusText);
     throw new Error(`${res.status}: ${text}`);
   }
-  // Response is wrapped: { data: { data: { token, admin } } }
   const json = await res.json();
-  const inner = json?.data?.data ?? json?.data ?? json;
+  const inner = json.data;
   return { token: inner.token, admin: inner.admin };
 }
 
-export function fetchAnalytics(token: string, params: AnalyticsParams = {}): Promise<AnalyticsResponse> {
+export async function fetchAnalytics(token: string, params: AnalyticsParams = {}): Promise<AnalyticsResponse['data']> {
   const qs = new URLSearchParams();
   if (params.template) qs.set('template', params.template);
   if (params.startDate) qs.set('startDate', params.startDate);
@@ -103,25 +101,28 @@ export function fetchAnalytics(token: string, params: AnalyticsParams = {}): Pro
   if (params.page) qs.set('page', String(params.page));
   if (params.limit) qs.set('limit', String(params.limit));
   const query = qs.toString() ? `?${qs}` : '';
-  return request<AnalyticsResponse>(`/mail/analytics${query}`, token);
+  const res = await request<AnalyticsResponse>(`/mail/analytics${query}`, token);
+  return res.data;
 }
 
-export function sendWelcomeEmails(
+export async function sendWelcomeEmails(
   token: string,
   payload: { emails?: string[]; useWaitlist?: boolean },
 ): Promise<SendResult> {
-  return request<SendResult>('/mail/send/welcome', token, {
+  const res = await request<{ success: boolean; data: SendResult }>('/mail/send/welcome', token, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+  return res.data;
 }
 
-export function sendCustomEmail(
+export async function sendCustomEmail(
   token: string,
   payload: { emails: string[]; subject: string; body: string },
 ): Promise<SendResult> {
-  return request<SendResult>('/mail/send/custom', token, {
+  const res = await request<{ success: boolean; data: SendResult }>('/mail/send/custom', token, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+  return res.data;
 }
