@@ -101,7 +101,7 @@ export function fetchAnalytics(token: string, params: AnalyticsParams = {}): Pro
   if (params.page) qs.set('page', String(params.page));
   if (params.limit) qs.set('limit', String(params.limit));
   const query = qs.toString() ? `?${qs}` : '';
-  return request<AnalyticsResponse>(`/admin/mail/analytics${query}`, token);
+  return request<AnalyticsResponse>(`/mail/analytics${query}`, token);
 }
 
 export function sendWelcomeEmails(
