@@ -69,15 +69,15 @@ export interface AnalyticsParams {
   limit?: number;
 }
 
-export interface AdminLoginResponse {
-  success: boolean;
-  data: {
-    token: string;
-    admin: { id: string; email: string; firstName: string; lastName: string; roles: string[] };
-  };
+export interface AdminInfo {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  roles: string[];
 }
 
-export async function adminLogin(email: string, password: string): Promise<AdminLoginResponse> {
+export async function adminLogin(email: string, password: string): Promise<{ token: string; admin: AdminInfo }> {
   const res = await fetch(`${BASE}/admin/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -87,7 +87,10 @@ export async function adminLogin(email: string, password: string): Promise<Admin
     const text = await res.text().catch(() => res.statusText);
     throw new Error(`${res.status}: ${text}`);
   }
-  return res.json() as Promise<AdminLoginResponse>;
+  // Response is wrapped: { data: { data: { token, admin } } }
+  const json = await res.json();
+  const inner = json?.data?.data ?? json?.data ?? json;
+  return { token: inner.token, admin: inner.admin };
 }
 
 export function fetchAnalytics(token: string, params: AnalyticsParams = {}): Promise<AnalyticsResponse> {
