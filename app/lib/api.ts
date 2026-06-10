@@ -108,7 +108,7 @@ export function sendWelcomeEmails(
   token: string,
   payload: { emails?: string[]; useWaitlist?: boolean },
 ): Promise<SendResult> {
-  return request<SendResult>('/admin/mail/send/welcome', token, {
+  return request<SendResult>('/mail/send/welcome', token, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -118,7 +118,7 @@ export function sendCustomEmail(
   token: string,
   payload: { emails: string[]; subject: string; body: string },
 ): Promise<SendResult> {
-  return request<SendResult>('/admin/mail/send/custom', token, {
+  return request<SendResult>('/mail/send/custom', token, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
